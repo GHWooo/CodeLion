@@ -1,22 +1,148 @@
-<!DOCTYPE html>
-<!-- 웹의 기본 언어를 한국어로 지정 -->
+<!DOCTYPE html> 
+<!-- 한국어 설정 -->
 <html lang="ko">   
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <!-- bootstrap css 링크 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <!-- css 파일 연결 -->
     <link rel="stylesheet" href="style.css">
 </head>
-<!-- 적절한 간격을 띄우기 위해 container 클래스 사용 -->
 <body class = "container">
+    <!-- 시작 페이지 -->
     <article class = "start">
-        <!-- mt-5 : margin-top 으로 5 만큼의 간격, text-center : 지문을 가운데 정렬 -->
         <h1 class = "mt-5 text-center">나랑 꼭 닮은 세렝게티 동물은?</h1>
-        <button type="button" class="btn btn-primary mt-5">테스트 시작하기</button>    
+        <!-- 누르면 start함수 실행 -->
+        <button type="button" class="btn btn-primary mt-5" onclick="start()">테스트 시작하기</button>    
     </article>
+    <!-- 질문 페이지 -->
+    <article class = "question">
+        <!-- 프로그래스 바, 질문이 넘어갈때마다 채워짐 -->
+        <div class="progress mt-5">
+            <div class="progress-bar" role="progressbar" style="width: calc(100/12*1%)"></div>
+        </div>
+        <!-- 문제 출력 -->
+        <h2 id = "title" class = "text-center mt-5">문제</h2>
+        <!-- 버튼 클릭시 해당되는 문제 타입을 반환하기 위한 태그 -->
+        <input id="type" type="hidden" value="EI">
+        <!-- 두가지 성향 중 하나를 결정짓는 버튼 -->
+        <button id = "A" type="button" class="btn btn-primary mt-5">Primary</button>
+        <button id = "B" type="button" class="btn btn-primary mt-5">Primary</button>
+    </article> 
+    <!-- 결과 페이지 -->
+    <article class = "result">
+        <!-- 해당되는 이미지 출력 -->
+        <img id = "img" src="" class="rounded-circle mt-5">
+        <!-- 해당되는 동물 이름 출력 -->
+        <h2 id = "animal" class = "text-center mt-5">동물이름</h2>
+        <!-- 해당되는 동물 설명 출력 -->
+        <h3 id = "explain" class = "text-center mt-5">설명</h3>
+    </article>
+    <!-- 특정 타입의 문제에서 버튼 클릭시 해당되는 타입의 점수가 오름
+    단 하나의 버튼만 점수가 오르기 때문에 3문제 이므로 2를 기준으로 어느 성향인지 파악 -->
+    <input type="hidden" id="EI" value="0">
+    <input type="hidden" id="SN" value="0">
+    <input type="hidden" id="TF" value="0">
+    <input type="hidden" id="JP" value="0">
+    <!-- bootstrap js 링크 -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script>
+        // 문제 번호를 순서대로 출력하기 위해 변수 선언
+        var num = 1;
+        // 문제와 문제 타입, 버튼 텍스트를 저장하는 객체 생성
+        var q = {
+            1 : {"title": "문제 1번", "type" : "EI", "A" : "E", "B" : "I"},
+            2 : {"title": "문제 2번", "type" : "EI", "A" : "E", "B" : "I"},
+            3 : {"title": "문제 3번", "type" : "EI", "A" : "E", "B" : "I"},
+            4 : {"title": "문제 4번", "type" : "SN", "A" : "S", "B" : "N"},
+            5 : {"title": "문제 5번", "type" : "SN", "A" : "S", "B" : "N"},
+            6 : {"title": "문제 6번", "type" : "SN", "A" : "S", "B" : "N"},
+            7 : {"title": "문제 7번", "type" : "TF", "A" : "T", "B" : "F"},
+            8 : {"title": "문제 8번", "type" : "TF", "A" : "T", "B" : "F"},
+            9 : {"title": "문제 9번", "type" : "TF", "A" : "T", "B" : "F"},
+            10 : {"title": "문제 10번", "type" : "JP", "A" : "J", "B" : "P"},
+            11 : {"title": "문제 11번", "type" : "JP", "A" : "J", "B" : "P"},
+            12 : {"title": "문제 12번", "type" : "JP", "A" : "J", "B" : "P"}
+        }
+        // mbti 별 이름, 설명, 이미지를 저장하는 객체 생성
+        var result = {
+            "ESTJ" : {"animal" : "사자", "explain" : "당신은 사자입니다!", "img" : "images/lion.jpg"},
+            "ESTP" : {"animal" : "표범", "explain" : "당신은 표범입니다!", "img" : "images/leopard.jpg"},
+            "ESFJ" : {"animal" : "하이에나", "explain" : "당신은 하이에나입니다!", "img" : "images/hyena.jpg"},
+            "ESFP" : {"animal" : "치타", "explain" : "당신은 치타입니다!", "img" : "images/cheetah.jpg"},
+            "ENTJ" : {"animal" : "자칼", "explain" : "당신은 자칼입니다!", "img" : "images/jackal.jpg"},
+            "ENTP" : {"animal" : "타조", "explain" : "당신은 타조입니다!", "img" : "images/ostrich.jpg"},
+            "ENFJ" : {"animal" : "물소", "explain" : "당신은 물소입니다!", "img" : "images/buffalo.jpg"},
+            "ENFP" : {"animal" : "독수리", "explain" : "당신은 독수리입니다!", "img" : "images/eagle.jpg"},
+            "ISTJ" : {"animal" : "코끼리", "explain" : "당신은 코끼리입니다!", "img" : "images/elephant.jpg"},
+            "ISTP" : {"animal" : "코뿔소", "explain" : "당신은 코뿔소입니다!", "img" : "images/rhino.jpg"},
+            "ISFJ" : {"animal" : "하마", "explain" : "당신은 하마입니다!", "img" : "images/hippo.jpg"},
+            "ISFP" : {"animal" : "미어캣", "explain" : "당신은 미어캣입니다!", "img" : "images/meerkat.jpg"},
+            "INTJ" : {"animal" : "홍학", "explain" : "당신은 홍학입니다!", "img" : "images/flamingo.jpg"},
+            "INTP" : {"animal" : "얼룩말", "explain" : "당신은 얼룩말입니다!", "img" : "images/zebra.jpg"},
+            "INFJ" : {"animal" : "톰슨가젤", "explain" : "당신은 톰슨가젤입니다!", "img" : "images/gazelle.jpg"},
+            "INFP" : {"animal" : "기린", "explain" : "당신은 기린입니다!", "img" : "images/giraffe.jpg"},
+        }
+        // 시작 버튼을 누르면 실행되는 함수
+        function start(){
+            // 시작 페이지에 있는 요소를 숨기고 question 페이지를 출력
+            $(".start").hide();
+            $(".question").show();
+            // 시작하자 마자 객체에서 첫번째 문제를 받아오기 위함
+            next();
+        }
+        // 두개의 버튼 중 위에 위치한 버튼을 클릭시 실행되는 함수
+        $("#A").click(function(){
+            // 문제의 타입을 변수에 저장
+            var type = $("#type").val();
+            // 해당 타입의 점수를 변수에 저장
+            var preValue = $("#"+type).val();
+            // 기존의 점수에 1을 더한 값을 다시 반환
+            $("#"+type).val(parseInt(preValue)+1);
+            // 다음 문제로 패스
+            next();
+        });
+        // 두개의 버튼 중 아래에 위치한 버튼을 클릭시 실행되는 함수
+        $("#B").click(function(){
+            // 따로 점수를 변동할 것 없이 다름 문제로 패스
+            next();
+        });
+        // 다음 문제로 지나가는 함수
+        function next(){
+            // 마지막 문제라면
+            if (num == 13) {
+                // 질문 페이지를 숨기고 결과 페이지를 출력
+                $(".question").hide();
+                $(".result").show();
+                // 최종적으로 mbti를 저장할 변수 생성
+                var mbti = "";
+                // 저장했던 점수를 조건을 통해 확인하여 mbti 저장
+                ($("#EI").val() < 2) ? mbti += "I" : mbti += "E";
+                ($("#SN").val() < 2) ? mbti += "N" : mbti += "S";
+                ($("#TF").val() < 2) ? mbti += "F" : mbti += "T";
+                ($("#JP").val() < 2) ? mbti += "P" : mbti += "J";
+                // 생성된 mbti에 해당되는 객체의 정보를 받아와 출력
+                $("#img").attr('src', result[mbti]["img"]);
+                $("#animal").html(result[mbti]["animal"]);
+                $("#explain").html(result[mbti]["explain"]);
+            }
+            // 마지막 문제가 아니라면
+            else{
+                //프로그레스 바의 퍼센트를 문제 번호에 맞게 변경
+                $(".progress-bar").attr('style', 'width: calc(100/12*'+num+'%)');
+                // 문제와 문제의 타입, 버튼의 텍스트를 순서에 맞게 변경
+                $("#title").html(q[num]["title"]);
+                $("#type").val(q[num]["type"]);
+                $("#A").html(q[num]["A"]);
+                $("#B").html(q[num]["B"]);
+                // 다음 문제로 넘어가기 위해 num + 1
+                num++;
+            } 
+        }
+    </script>
 </body>
 </html>
